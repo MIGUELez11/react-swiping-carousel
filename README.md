@@ -42,8 +42,8 @@ The Carousel have some flags which provide you some customization:
 
 |FlagName|Values|Action|
 |--|--|--|
-|align|"left"/"center"/"right"|This sets the alignment for the selected item|
-|align|{first: "left"/"center"/"right", last: "left"/"center"/"right", nth: "left"/"center"/"right"}|This sets the alignment for the first element, the last and the selected item|
+|align|"left" \|\| "center" \|\| "right"|This sets the alignment for the selected item|
+|align|{first: "left" \|\| "center" \|\| "right", last: "left" \|\| "center" \|\| "right", nth: "left" \|\| "center" \|\| "right"}|This sets the alignment for the first element, the last and the selected item|
 |length|integer|The number of items to use as swipeable|
 |margin|float|The space between items|
 
