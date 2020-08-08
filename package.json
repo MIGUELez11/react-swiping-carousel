@@ -1,10 +1,10 @@
 {
 	"name": "react-swiping-carousel",
-	"version": "1.0.0",
+	"version": "1.0.2",
 	"description": "Made with create-react-library",
 	"author": "MIGUELez11",
 	"license": "MIT",
-	"repository": "MIGUELez11/react-swipeable-carousel",
+	"repository": "MIGUELez11/react-swiping-carousel",
 	"main": "dist/index.js",
 	"module": "dist/index.modern.js",
 	"source": "src/index.js",
@@ -12,7 +12,8 @@
 		"node": ">=10"
 	},
 	"scripts": {
-		"build": "microbundle-crl --no-compress --format modern,cjs",
+		"build": "microbundle-crl --no-compress --format modern,cjs --css-modules true && run-s add:css",
+		"add:css": "sed -i '3s/^/require (`.\\\/index.css`);\\n/' dist/index.js && sed -i '2s/^/import (`.\\\/index.css`);\\n/' dist/index.modern.js",
 		"start": "microbundle-crl watch --no-compress --format modern,cjs",
 		"prepare": "run-s build",
 		"test": "run-s test:unit test:lint test:build",
