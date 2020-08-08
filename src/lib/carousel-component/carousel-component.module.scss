@@ -1,0 +1,25 @@
+.app_carousel {
+    display: flex;
+    overflow: hidden;
+	width: 100%;
+	user-select: none;
+	-moz-user-select: none;
+	-webkit-user-drag: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+    .carousel_elements {
+		margin-right: 20px;
+		&:last-child {
+			margin: 0;
+		}
+		user-select: none;
+		-moz-user-select: none;
+		-webkit-user-drag: none;
+		-webkit-user-select: none;
+		-ms-user-select: none;
+    }
+    div {
+        margin: 0;
+        min-width: 72px;
+    }
+}
