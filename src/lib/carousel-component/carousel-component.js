@@ -91,7 +91,12 @@ export class CarouselComponent extends Component {
     const x = e.clientX || (e.touches !== undefined && e.touches[0].clientX)
     let { swiping, scrolled, ref, index, start, calculatedSize } = this.state
     if (start) {
-      if (swiping && !scrolled && x !== start) {
+      console.log(
+        x,
+        start,
+        Math.abs(x - start) > (this.props.scrollDistance !== undefined || 10)
+      )
+      if (swiping && !scrolled && x !== start && Math.abs(x - start) > 100) {
         index += -Math.sign(x - start)
         // eslint-disable-next-line no-nested-ternary
         index =
@@ -147,17 +152,14 @@ export class CarouselComponent extends Component {
           )
           if (preValue === currValue) {
             clearInterval(interval)
-            this.setState(
-              {
-                ...this.state,
-                size: this.state.ref.current.getBoundingClientRect(),
-                calculatedSize: this.state.childrenRefs.map((el) =>
-                  el.current.getBoundingClientRect()
-                ),
-                call: this.state.call + 1
-              },
-              console.log(this.state)
-            )
+            this.setState({
+              ...this.state,
+              size: this.state.ref.current.getBoundingClientRect(),
+              calculatedSize: this.state.childrenRefs.map((el) =>
+                el.current.getBoundingClientRect()
+              ),
+              call: this.state.call + 1
+            })
           }
           preValue = currValue
         } catch (e) {
@@ -247,6 +249,7 @@ CarouselComponent.propTypes = {
     })
   ]).isRequired,
   length: PropTypes.number,
-  margin: PropTypes.number
+  margin: PropTypes.number,
+  scrollDistance: PropTypes.number
 }
 export default CarouselComponent

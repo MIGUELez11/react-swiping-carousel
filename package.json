@@ -1,6 +1,6 @@
 {
 	"name": "react-swiping-carousel",
-	"version": "1.0.3-d",
+	"version": "1.0.4",
 	"description": "A fancy carousel which enables swiping on it. Works on all devices",
 	"author": "MIGUELez11",
 	"license": "MIT",
@@ -22,7 +22,7 @@
 		"advanced"
 	],
 	"scripts": {
-		"build": "microbundle-crl --no-compress --format modern,cjs --css-modules true && run-s add:css",
+		"build": "rm -rf dist && microbundle-crl --no-compress --format modern,cjs --css-modules true && run-s add:css",
 		"add:css": "sed -i '3s/^/require (`.\\\/index.css`);\\n/' dist/index.js && sed -i '2s/^/import (`.\\\/index.css`);\\n/' dist/index.modern.js",
 		"start": "microbundle-crl watch --no-compress --format modern,cjs",
 		"prepare": "run-s build",

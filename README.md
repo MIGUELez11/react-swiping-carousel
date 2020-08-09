@@ -36,7 +36,7 @@ The Carousel will expand 100% of its parent, then will calculate the space of ea
 
 I'm currently working on detect windows resizes and/or element size rescaling for making the component fully responsive
 
-## Flags
+## Props
 
 The Carousel have some flags which provide you some customization:
 
@@ -46,6 +46,7 @@ The Carousel have some flags which provide you some customization:
 |align|{first: "left" \|\| "center" \|\| "right", last: "left" \|\| "center" \|\| "right", nth: "left" \|\| "center" \|\| "right"}|This sets the alignment for the first element, the last and the selected item|
 |length|integer|The number of items to use as swipeable|
 |margin|float|The space between items|
+|scrollDistance|float|The distance the user needs to swipe for changes to take effect|
 
 ## License
 
