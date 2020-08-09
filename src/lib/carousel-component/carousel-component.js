@@ -91,12 +91,15 @@ export class CarouselComponent extends Component {
     const x = e.clientX || (e.touches !== undefined && e.touches[0].clientX)
     let { swiping, scrolled, ref, index, start, calculatedSize } = this.state
     if (start) {
-      console.log(
-        x,
-        start,
-        Math.abs(x - start) > (this.props.scrollDistance !== undefined || 10)
-      )
-      if (swiping && !scrolled && x !== start && Math.abs(x - start) > 100) {
+      if (
+        swiping &&
+        !scrolled &&
+        x !== start &&
+        Math.abs(x - start) >
+          (this.props.scrollDistance !== undefined
+            ? this.props.scrollDistance
+            : 10)
+      ) {
         index += -Math.sign(x - start)
         // eslint-disable-next-line no-nested-ternary
         index =
