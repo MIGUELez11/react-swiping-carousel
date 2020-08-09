@@ -1,7 +1,7 @@
 {
 	"name": "react-swiping-carousel",
-	"version": "1.0.2",
-	"description": "Made with create-react-library",
+	"version": "1.0.3-d",
+	"description": "A fancy carousel which enables swiping on it. Works on all devices",
 	"author": "MIGUELez11",
 	"license": "MIT",
 	"repository": "MIGUELez11/react-swiping-carousel",
@@ -11,6 +11,16 @@
 	"engines": {
 		"node": ">=10"
 	},
+	"keywords": [
+		"carousel",
+		"slideshow",
+		"slider",
+		"swipe",
+		"touch",
+		"customizable",
+		"react",
+		"advanced"
+	],
 	"scripts": {
 		"build": "microbundle-crl --no-compress --format modern,cjs --css-modules true && run-s add:css",
 		"add:css": "sed -i '3s/^/require (`.\\\/index.css`);\\n/' dist/index.js && sed -i '2s/^/import (`.\\\/index.css`);\\n/' dist/index.modern.js",

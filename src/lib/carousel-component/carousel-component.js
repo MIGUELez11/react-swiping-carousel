@@ -6,7 +6,12 @@ export class CarouselComponent extends Component {
   called = false
   constructor(props) {
     super(props)
-    console.log(this.props.children)
+    if (
+      !this.props.children ||
+      !this.props.children.length ||
+      !this.props.children[0].hasOwnProperty('ref')
+    )
+      throw new Error('Please provide children to the carousel')
     this.called = false
     this.children = this.props.children.map((el, id) =>
       React.cloneElement(el, {
@@ -98,14 +103,13 @@ export class CarouselComponent extends Component {
         // eslint-disable-next-line no-mixed-operators
         ref.current.scroll({
           left:
-            this.state.padding === 'left'
-              ? calculatedSize[index].x
+            calculatedSize[index].x -
+            this.state.size.x +
+            (this.state.padding === 'left'
+              ? 0
               : this.state.padding === 'right'
-              ? calculatedSize[index].x -
-                this.state.size.width +
-                calculatedSize[index].width
-              : calculatedSize[index].x -
-                (this.state.size.width - calculatedSize[index].width) / 2,
+              ? -this.state.size.width + calculatedSize[index].width
+              : -(this.state.size.width - calculatedSize[index].width) / 2),
           behavior: 'smooth'
         })
         this.setState({ ...this.state, scrolled: true, index: index })
@@ -143,14 +147,17 @@ export class CarouselComponent extends Component {
           )
           if (preValue === currValue) {
             clearInterval(interval)
-            this.setState({
-              ...this.state,
-              size: this.state.ref.current.getBoundingClientRect(),
-              calculatedSize: this.state.childrenRefs.map((el) =>
-                el.current.getBoundingClientRect()
-              ),
-              call: this.state.call + 1
-            })
+            this.setState(
+              {
+                ...this.state,
+                size: this.state.ref.current.getBoundingClientRect(),
+                calculatedSize: this.state.childrenRefs.map((el) =>
+                  el.current.getBoundingClientRect()
+                ),
+                call: this.state.call + 1
+              },
+              console.log(this.state)
+            )
           }
           preValue = currValue
         } catch (e) {
@@ -172,6 +179,7 @@ export class CarouselComponent extends Component {
         onTouchEnd={this.endSwipe}
         draggable='false'
         style={{
+          ...this.props.style,
           visibility: this.state.calculatedSize.length ? 'visible' : 'hidden'
         }}
       >
