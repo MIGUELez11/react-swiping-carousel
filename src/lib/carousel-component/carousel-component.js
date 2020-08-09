@@ -171,7 +171,7 @@ export class CarouselComponent extends Component {
   render() {
     return (
       <div
-        className={carouselStyle.app_carousel}
+        className={this.props.className + ' ' + carouselStyle.app_carousel}
         ref={this.state.ref}
         onMouseDown={this.startSwipe}
         onMouseUp={this.endSwipe}
