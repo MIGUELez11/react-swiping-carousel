@@ -9,6 +9,7 @@ export class CarouselComponent extends Component {
     if (
       !this.props.children ||
       !this.props.children.length ||
+      // eslint-disable-next-line no-prototype-builtins
       !this.props.children[0].hasOwnProperty('ref')
     )
       throw new Error('Please provide children to the carousel')
@@ -176,7 +177,11 @@ export class CarouselComponent extends Component {
   render() {
     return (
       <div
-        className={this.props.className + ' ' + carouselStyle.app_carousel}
+        className={
+          this.props.className
+            ? this.props.className
+            : '' + ' ' + carouselStyle.app_carousel
+        }
         ref={this.state.ref}
         onMouseDown={this.startSwipe}
         onMouseUp={this.endSwipe}

@@ -15,7 +15,7 @@ npm install react-swiping-carousel
 ```jsx
 import React, { Component } from 'react'
 
-import CarouselComponent from 'react-swiping-carousel'
+import {CarouselComponent} from 'react-swiping-carousel'
 
 class Example extends Component {
   render() {
@@ -25,7 +25,7 @@ class Example extends Component {
 				<p>You can insert any tag as child</p>
 			</div>
 			<p>Even a lonely p</p>
-			<img src="" alt="Or an image">
+			<img src="" alt="Or an image" />
 		</CarouselComponent>
 	)
   }
