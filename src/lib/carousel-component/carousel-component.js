@@ -6,6 +6,7 @@ export class CarouselComponent extends Component {
   called = false
   resize = null
   initialized = false
+  previous = null
   constructor(props) {
     super(props)
     if (
@@ -101,9 +102,9 @@ export class CarouselComponent extends Component {
         !scrolled &&
         x !== start &&
         Math.abs(x - start) >
-          (this.props.scrollDistance !== undefined
-            ? this.props.scrollDistance
-            : 10)
+        (this.props.scrollDistance !== undefined
+          ? this.props.scrollDistance
+          : 10)
       ) {
         index += -Math.sign(x - start)
         // eslint-disable-next-line no-nested-ternary
@@ -111,26 +112,27 @@ export class CarouselComponent extends Component {
           index >= this.state.length
             ? 0
             : index < 0
-            ? this.state.length - 1
-            : index
+              ? this.state.length - 1
+              : index
         // eslint-disable-next-line no-mixed-operators
-        this.setPosition()
+        this.setPosition({ index })
         this.setState({ ...this.state, scrolled: true, index: index })
       }
     }
   }
 
-  setPosition(behavior = 'smooth') {
-    const { ref, calculatedSize, size, index } = this.state
-    console.log('size:', size)
+  setPosition(flags = { behavior: 'smooth', index: this.state.index }) {
+    const { ref, calculatedSize, size } = this.state
+    let behavior = flags.behavior || "smooth"
+    let index = flags.index === undefined ? this.state.index : flags.index
     ref.current.scroll({
       left:
         calculatedSize[index].x +
         (this.state.padding === 'left'
           ? 0
           : this.state.padding === 'right'
-          ? -size.width + calculatedSize[index].width
-          : -size.width / 2 + calculatedSize[index].width / 2),
+            ? -size.width + calculatedSize[index].width
+            : -size.width / 2 + calculatedSize[index].width / 2),
       behavior
     })
   }
@@ -198,16 +200,26 @@ export class CarouselComponent extends Component {
         this.setState({ ...this.state, size: this.calcWindowSize() }, () => {
           this.called = false
           this.state.ref.current.scroll({ left: 0 })
-          this.calcSize(() => this.setPosition())
+          this.calcSize(/*(state) => this.setPosition({ behavior: "auto", index: state.index })*/)
+          this.called = false
         })
-      }, 100)
+      }, 200)
     })
     this.setState({ ...this.state })
   }
 
   componentDidUpdate() {
     // Añadir un detector de resize
-    this.calcSize()
+    this.calcSize((state) => {
+      // prev = prev.map(el => JSON.stringify(el)).join(",")
+      let current = state.calculatedSize.map(el => JSON.stringify(el)).join(",")
+      console.log("change window")
+      if (this.previous !== current) {
+        this.setPosition({ behavior: "auto" })
+        console.log("position setted", this.called);
+      }
+      this.previous = current
+    });
   }
 
   render() {
