@@ -121,16 +121,20 @@ export class CarouselComponent extends Component {
     }
   }
 
-  setPosition(flags = { behavior: 'smooth', index: this.state.index }) {
-    const { ref, calculatedSize, size } = this.state
+  setPosition(flags = { behavior: undefined, index: undefined, calculatedSize: undefined, size: undefined }) {
+    const { ref } = this.state
+    let size = flags.size === undefined ? this.state.size : flags.size;
+    let calculatedSize = flags.calculatedSize === undefined ? this.state.calculatedSize : flags.calculatedSize
     let behavior = flags.behavior || "smooth"
     let index = flags.index === undefined ? this.state.index : flags.index
+    let padding = (index == 0 ? this.state.leftMargin : index == this.state.childrenRefs.length - 1 ? this.state.rightMargin : this.state.padding)
+    console.log(padding)
     ref.current.scroll({
       left:
         calculatedSize[index].x +
-        (this.state.padding === 'left'
+        (padding === 'left'
           ? 0
-          : this.state.padding === 'right'
+          : padding === 'right'
             ? -size.width + calculatedSize[index].width
             : -size.width / 2 + calculatedSize[index].width / 2),
       behavior
@@ -159,13 +163,18 @@ export class CarouselComponent extends Component {
           )
           if (preValue === currValue) {
             clearInterval(interval)
+            this.state.ref.current.scroll({ left: 0 })
+            let calculatedSize = this.state.childrenRefs.map((el) =>
+              el.current.getBoundingClientRect()
+            );
+            let size = this.calcWindowSize()
+            this.setPosition({ behavior: "auto", calculatedSize, size });
+
             this.setState(
               {
                 ...this.state,
-                size: this.calcWindowSize(), // this.state.ref.current.getBoundingClientRect(),
-                calculatedSize: this.state.childrenRefs.map((el) =>
-                  el.current.getBoundingClientRect()
-                ),
+                size, // this.state.ref.current.getBoundingClientRect(),
+                calculatedSize,
                 call: this.state.call + 1
               },
               () => {
@@ -199,9 +208,8 @@ export class CarouselComponent extends Component {
       this.resize = setTimeout(() => {
         this.setState({ ...this.state, size: this.calcWindowSize() }, () => {
           this.called = false
-          this.state.ref.current.scroll({ left: 0 })
           this.calcSize(/*(state) => this.setPosition({ behavior: "auto", index: state.index })*/)
-          this.called = false
+          // this.called = false
         })
       }, 200)
     })
@@ -215,7 +223,7 @@ export class CarouselComponent extends Component {
       let current = state.calculatedSize.map(el => JSON.stringify(el)).join(",")
       console.log("change window")
       if (this.previous !== current) {
-        this.setPosition({ behavior: "auto" })
+        // this.setPosition({ behavior: "auto" })
         console.log("position setted", this.called);
       }
       this.previous = current
