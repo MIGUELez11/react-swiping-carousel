@@ -12,7 +12,6 @@ export class CarouselComponent extends Component {
     if (
       !this.props.children ||
       !this.props.children.length ||
-      // eslint-disable-next-line no-prototype-builtins
       !this.props.children[0].hasOwnProperty('ref')
     )
       throw new Error('Please provide children to the carousel')
@@ -41,6 +40,13 @@ export class CarouselComponent extends Component {
       calculatedSize: [],
       call: 0,
       eventListener: { mouse: null, touch: null },
+      resizeObserver: new ResizeObserver(() => {
+        console.log("style change")
+        this.setState({ ...this.state, size: this.calcWindowSize() }, () => {
+          this.called = false
+          this.calcSize()
+        })
+      }),
       ...this.setAlignment()
     }
     this.endSwipe = this.endSwipe.bind(this)
@@ -49,8 +55,6 @@ export class CarouselComponent extends Component {
   }
 
   setAlignment() {
-    // TODO
-    // Change how I detect the alignment for setPosition to work
     let leftMargin
     let rightMargin
     let padding = 0
@@ -80,7 +84,6 @@ export class CarouselComponent extends Component {
   }
 
   startSwipe(e) {
-    // eslint-disable-next-line no-extra-parens
     const x = e.clientX || (e.touches !== undefined && e.touches[0].clientX)
     const mouse = document.addEventListener('mousemove', this.swipe)
     const touch = document.addEventListener('touchmove', this.swipe)
@@ -93,7 +96,6 @@ export class CarouselComponent extends Component {
   }
 
   swipe(e) {
-    // eslint-disable-next-line no-extra-parens
     const x = e.clientX || (e.touches !== undefined && e.touches[0].clientX)
     let { swiping, scrolled, index, start } = this.state
     if (start) {
@@ -107,14 +109,12 @@ export class CarouselComponent extends Component {
           : 10)
       ) {
         index += -Math.sign(x - start)
-        // eslint-disable-next-line no-nested-ternary
         index =
           index >= this.state.length
             ? 0
             : index < 0
               ? this.state.length - 1
               : index
-        // eslint-disable-next-line no-mixed-operators
         this.setPosition({ index })
         this.setState({ ...this.state, scrolled: true, index: index })
       }
@@ -128,7 +128,6 @@ export class CarouselComponent extends Component {
     let behavior = flags.behavior || "smooth"
     let index = flags.index === undefined ? this.state.index : flags.index
     let padding = (index == 0 ? this.state.leftMargin : index == this.state.childrenRefs.length - 1 ? this.state.rightMargin : this.state.padding)
-    console.log(padding)
     ref.current.scroll({
       left:
         calculatedSize[index].x +
@@ -173,7 +172,7 @@ export class CarouselComponent extends Component {
             this.setState(
               {
                 ...this.state,
-                size, // this.state.ref.current.getBoundingClientRect(),
+                size,
                 calculatedSize,
                 call: this.state.call + 1
               },
@@ -193,7 +192,6 @@ export class CarouselComponent extends Component {
 
   calcWindowSize(state = this.state) {
     try {
-      console.log('Window size changed')
       return state.ref.current.getBoundingClientRect()
     } catch {
       throw new Error("Can't find carousel")
@@ -201,6 +199,10 @@ export class CarouselComponent extends Component {
   }
 
   componentDidMount() {
+
+    this.state.childrenRefs.map(el => {
+      this.state.resizeObserver.observe(el.current)
+    });
     document.addEventListener('mouseup', this.endSwipe)
     document.addEventListener('touchend', this.endSwipe)
     window.addEventListener('resize', () => {
@@ -208,8 +210,7 @@ export class CarouselComponent extends Component {
       this.resize = setTimeout(() => {
         this.setState({ ...this.state, size: this.calcWindowSize() }, () => {
           this.called = false
-          this.calcSize(/*(state) => this.setPosition({ behavior: "auto", index: state.index })*/)
-          // this.called = false
+          this.calcSize()
         })
       }, 200)
     })
@@ -217,82 +218,59 @@ export class CarouselComponent extends Component {
   }
 
   componentDidUpdate() {
-    // Añadir un detector de resize
-    this.calcSize((state) => {
-      // prev = prev.map(el => JSON.stringify(el)).join(",")
-      let current = state.calculatedSize.map(el => JSON.stringify(el)).join(",")
-      console.log("change window")
-      if (this.previous !== current) {
-        // this.setPosition({ behavior: "auto" })
-        console.log("position setted", this.called);
-      }
-      this.previous = current
-    });
+    this.calcSize();
   }
 
   render() {
     return (
-      <div
-        className={
-          this.props.className
-            ? this.props.className
-            : '' + ' ' + carouselStyle.app_carousel
-        }
-        ref={this.state.ref}
-        onMouseDown={this.startSwipe}
-        onMouseUp={this.endSwipe}
-        onTouchStart={this.startSwipe}
-        onTouchEnd={this.endSwipe}
-        draggable='false'
-        style={{
-          ...this.props.style,
-          visibility: this.state.calculatedSize.length ? 'visible' : 'hidden'
-        }}
-      >
-        {this.state.calculatedSize.length && (
-          <div
-            style={{
-              minWidth: this.state.size.width
-              // this.state.leftMargin === 'left'
-              //   ? '0px'
-              //   : this.state.leftMargin === 'right'
-              //   ? this.state.size.width - this.state.calculatedSize[0].width
-              //   : (this.state.size.width -
-              //       this.state.calculatedSize[0].width) /
-              //     2
-            }}
-          />
-        )}
-        {this.children.map((el, i) =>
-          React.cloneElement(el, {
-            className:
-              (el.props.className || '') +
-              (i === this.state.index ? ' selected' : ''),
-            style: {
-              ...el.style,
-              marginRight:
-                this.props.margin !== undefined
-                  ? i === this.state.length - 1
-                    ? 0
-                    : this.props.margin
-                  : ''
-            }
-          })
-        )}
-        {this.state.length - 1 && this.state.calculatedSize.length && (
-          <div
-            style={{
-              minWidth: this.state.size.width
-              // this.state.rightMargin === 'right'
-              //   ? '0px'
-              //   : this.state.rightMargin === 'right'
-              //   ? (this.state.size.width -
-              //       this.state.calculatedSize[0].width) /
-              //     2
-              //   : this.state.size.width - this.state.calculatedSize[0].width
-            }}
-          />
-        )}
+      <div>
+        <div
+          className={
+            this.props.className
+              ? this.props.className
+              : '' + ' ' + carouselStyle.app_carousel
+          }
+          ref={this.state.ref}
+          onMouseDown={this.startSwipe}
+          onMouseUp={this.endSwipe}
+          onTouchStart={this.startSwipe}
+          onTouchEnd={this.endSwipe}
+          draggable='false'
+          style={{
+            ...this.props.style,
+            visibility: this.state.calculatedSize.length ? 'visible' : 'hidden'
+          }}
+        >
+          {this.state.calculatedSize.length && (
+            <div
+              style={{ minWidth: this.state.size.width }}
+            />
+          )}
+          {this.children.map((el, i) =>
+            React.cloneElement(el, {
+              className:
+                (el.props.className || '') +
+                (i === this.state.index ? ' selected' : ''),
+              style: {
+                ...el.style,
+                marginRight:
+                  this.props.margin !== undefined
+                    ? i === this.state.length - 1
+                      ? 0
+                      : this.props.margin
+                    : ''
+              }
+            })
+          )}
+          {this.state.length - 1 && this.state.calculatedSize.length && (
+            <div
+              style={{ minWidth: this.state.size.width }}
+            />
+          )}
+        </div>
+        <div className={carouselStyle.pagination}>
+          {this.props.children.map((el, i) => <span className={i == this.state.index ? "selected" : ""}>p</span>)}
+        </div>
       </div>
     )
   }
