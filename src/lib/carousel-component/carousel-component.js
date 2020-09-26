@@ -4,6 +4,8 @@ import carouselStyle from './carousel-component.module.scss'
 
 export class CarouselComponent extends Component {
   called = false
+  resize = null
+  initialized = false
   constructor(props) {
     super(props)
     if (
@@ -46,6 +48,8 @@ export class CarouselComponent extends Component {
   }
 
   setAlignment() {
+    // TODO
+    // Change how I detect the alignment for setPosition to work
     let leftMargin
     let rightMargin
     let padding = 0
@@ -90,7 +94,7 @@ export class CarouselComponent extends Component {
   swipe(e) {
     // eslint-disable-next-line no-extra-parens
     const x = e.clientX || (e.touches !== undefined && e.touches[0].clientX)
-    let { swiping, scrolled, ref, index, start, calculatedSize } = this.state
+    let { swiping, scrolled, index, start } = this.state
     if (start) {
       if (
         swiping &&
@@ -110,20 +114,25 @@ export class CarouselComponent extends Component {
             ? this.state.length - 1
             : index
         // eslint-disable-next-line no-mixed-operators
-        ref.current.scroll({
-          left:
-            calculatedSize[index].x -
-            this.state.size.x +
-            (this.state.padding === 'left'
-              ? 0
-              : this.state.padding === 'right'
-              ? -this.state.size.width + calculatedSize[index].width
-              : -(this.state.size.width - calculatedSize[index].width) / 2),
-          behavior: 'smooth'
-        })
+        this.setPosition()
         this.setState({ ...this.state, scrolled: true, index: index })
       }
     }
+  }
+
+  setPosition(behavior = 'smooth') {
+    const { ref, calculatedSize, size, index } = this.state
+    console.log('size:', size)
+    ref.current.scroll({
+      left:
+        calculatedSize[index].x +
+        (this.state.padding === 'left'
+          ? 0
+          : this.state.padding === 'right'
+          ? -size.width + calculatedSize[index].width
+          : -size.width / 2 + calculatedSize[index].width / 2),
+      behavior
+    })
   }
 
   endSwipe() {
@@ -137,15 +146,7 @@ export class CarouselComponent extends Component {
     document.removeEventListener('touchmove', this.swipe)
   }
 
-  componentDidMount() {
-    document.addEventListener('mouseup', this.endSwipe)
-    document.addEventListener('touchend', this.endSwipe)
-
-    this.setState({ ...this.state })
-  }
-
-  componentDidUpdate() {
-    // Añadir un detector de resize
+  calcSize(callback) {
     if (!this.called || this.state.call === 1) {
       this.called = true
       let preValue = ''
@@ -156,14 +157,19 @@ export class CarouselComponent extends Component {
           )
           if (preValue === currValue) {
             clearInterval(interval)
-            this.setState({
-              ...this.state,
-              size: this.state.ref.current.getBoundingClientRect(),
-              calculatedSize: this.state.childrenRefs.map((el) =>
-                el.current.getBoundingClientRect()
-              ),
-              call: this.state.call + 1
-            })
+            this.setState(
+              {
+                ...this.state,
+                size: this.calcWindowSize(), // this.state.ref.current.getBoundingClientRect(),
+                calculatedSize: this.state.childrenRefs.map((el) =>
+                  el.current.getBoundingClientRect()
+                ),
+                call: this.state.call + 1
+              },
+              () => {
+                if (callback) callback(this.state)
+              }
+            )
           }
           preValue = currValue
         } catch (e) {
@@ -172,6 +178,36 @@ export class CarouselComponent extends Component {
         }
       }, 100)
     }
+  }
+
+  calcWindowSize(state = this.state) {
+    try {
+      console.log('Window size changed')
+      return state.ref.current.getBoundingClientRect()
+    } catch {
+      throw new Error("Can't find carousel")
+    }
+  }
+
+  componentDidMount() {
+    document.addEventListener('mouseup', this.endSwipe)
+    document.addEventListener('touchend', this.endSwipe)
+    window.addEventListener('resize', () => {
+      if (this.resize) clearTimeout(this.resize)
+      this.resize = setTimeout(() => {
+        this.setState({ ...this.state, size: this.calcWindowSize() }, () => {
+          this.called = false
+          this.state.ref.current.scroll({ left: 0 })
+          this.calcSize(() => this.setPosition())
+        })
+      }, 100)
+    })
+    this.setState({ ...this.state })
+  }
+
+  componentDidUpdate() {
+    // Añadir un detector de resize
+    this.calcSize()
   }
 
   render() {
@@ -196,14 +232,14 @@ export class CarouselComponent extends Component {
         {this.state.calculatedSize.length && (
           <div
             style={{
-              minWidth:
-                this.state.leftMargin === 'left'
-                  ? '0px'
-                  : this.state.leftMargin === 'right'
-                  ? this.state.size.width - this.state.calculatedSize[0].width
-                  : (this.state.size.width -
-                      this.state.calculatedSize[0].width) /
-                    2
+              minWidth: this.state.size.width
+              // this.state.leftMargin === 'left'
+              //   ? '0px'
+              //   : this.state.leftMargin === 'right'
+              //   ? this.state.size.width - this.state.calculatedSize[0].width
+              //   : (this.state.size.width -
+              //       this.state.calculatedSize[0].width) /
+              //     2
             }}
           />
         )}
@@ -226,14 +262,14 @@ export class CarouselComponent extends Component {
         {this.state.length - 1 && this.state.calculatedSize.length && (
           <div
             style={{
-              minWidth:
-                this.state.rightMargin === 'right'
-                  ? '0px'
-                  : this.state.rightMargin === 'right'
-                  ? (this.state.size.width -
-                      this.state.calculatedSize[0].width) /
-                    2
-                  : this.state.size.width - this.state.calculatedSize[0].width
+              minWidth: this.state.size.width
+              // this.state.rightMargin === 'right'
+              //   ? '0px'
+              //   : this.state.rightMargin === 'right'
+              //   ? (this.state.size.width -
+              //       this.state.calculatedSize[0].width) /
+              //     2
+              //   : this.state.size.width - this.state.calculatedSize[0].width
             }}
           />
         )}

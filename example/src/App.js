@@ -5,7 +5,7 @@ import 'react-swipeable-carousel/dist/index.css'
 
 const App = () => {
 	return <div >
-		<CarouselComponent scrollDistance={100}>
+		<CarouselComponent scrollDistance={100} align="center">
 		<img src="https://randomwordgenerator.com/img/picture-generator/57e8d5474e54ab14f1dc8460962e33791c3ad6e04e507440752f78d0964bc2_640.jpg" alt="Project"/>
 					<img src="https://randomwordgenerator.com/img/picture-generator/sad-clown-1279878_640.jpg" alt="Project"/>
 					<img src="https://randomwordgenerator.com/img/picture-generator/53e2d7464f57b10ff3d8992cc12c30771037dbf85254784973267cd49344_640.jpg" alt="Project"/>
